@@ -19,6 +19,29 @@ from .__about__ import __version__
 
 INIT_JOBS_SYNC_WAVE = 1
 
+def _is_init_job_excluded(excluded_init_jobs: set[str], job_template: dict[str, t.Any]) -> bool:
+    """
+    Check if the job is excluded from the init jobs.
+    """
+    return job_template['metadata']['name'] in excluded_init_jobs
+
+
+def _is_init_job_for_service(service_name: str, job_template: dict[str, t.Any]) -> bool:
+    """
+    Check if the job is for the given service.
+    """
+    return job_template['metadata']['name'] == service_name + '-job'
+
+
+def _is_valid_init_job(excluded_init_jobs: set[str], service_name: str, job_template: dict[str, t.Any]) -> bool:
+    """
+    Check if the job is a valid init job.
+    """
+    is_excluded = _is_init_job_excluded(excluded_init_jobs, job_template)
+    is_for_service = _is_init_job_for_service(service_name, job_template)
+    return not is_excluded and is_for_service
+
+
 # This function is taken from
 # https://github.com/overhangio/tutor/blob/v16.1.8/tutor/commands/k8s.py#L182
 def _load_jobs(tutor_conf: types.Config) -> t.Iterable[t.Any]:
@@ -37,11 +60,11 @@ def get_init_tasks():
     context = click.get_current_context().obj
     tutor_conf = tutor_config.load(context.root)
 
-    for i, (service, command) in enumerate(init_tasks):
-        for template in _load_jobs(tutor_conf):
-            if template['metadata']['name'] != service + '-job':
-                continue
+    init_jobs = _load_jobs(tutor_conf)
+    excluded_init_jobs = set(tutor_conf.get('DRYDOCK_INIT_JOBS_EXCLUDED', ()))
 
+    for i, (service, command) in enumerate(init_tasks):
+        for template in filter(lambda x: _is_valid_init_job(excluded_init_jobs, service, x), init_jobs):
             render_command = tutor_env.render_str(tutor_conf, command)
 
             template['metadata']['name'] = 'drydock-' + template['metadata']['name'] + '-' + str(i)
@@ -131,6 +154,7 @@ config = {
     "defaults": {
         "VERSION": __version__,
         "INIT_JOBS": False,
+        "INIT_JOBS_EXCLUDED": [],
         "CMS_SSO_USER": "cms",
         "AUTO_TLS": True,
         "MIGRATE_FROM": 0,
