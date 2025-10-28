@@ -74,7 +74,9 @@ def get_init_tasks():
     excluded_init_jobs = set(tutor_conf.get('DRYDOCK_INIT_JOBS_EXCLUDED', ()))
 
     for i, (service, command) in enumerate(init_tasks):
-        for template in filter(lambda x: _is_valid_init_job(excluded_init_jobs, service, x), init_jobs):
+        for template in _load_jobs(tutor_conf):
+            if template['metadata']['name'] != service + '-job':
+                continue
             render_command = tutor_env.render_str(tutor_conf, command)
 
             template['metadata']['name'] = 'mydrydock-' + template['metadata']['name'] + '-' + str(i)
