@@ -73,16 +73,18 @@ def get_init_tasks():
     init_jobs = _load_jobs(tutor_conf)
     excluded_init_jobs = set(tutor_conf.get('DRYDOCK_INIT_JOBS_EXCLUDED', ()))
 
-    for i, (service, command) in enumerate(init_tasks):
-        for template in _load_jobs(tutor_conf):
-            if template['metadata']['name'] != service + '-job':
-                continue
-            render_command = tutor_env.render_str(tutor_conf, command)
+    raise ValueError("Reached me")
 
-            template['metadata']['name'] = 'mydrydock-' + template['metadata']['name'] + '-' + str(i)
-            template['metadata']['excluded_jobs'] = excluded_init_jobs
+    # for i, (service, command) in enumerate(init_tasks):
+    #     for template in _load_jobs(tutor_conf):
+    #         if template['metadata']['name'] != service + '-job':
+    #             continue
+    #         render_command = tutor_env.render_str(tutor_conf, command)
 
-            yield serialize.dumps(template)
+    #         template['metadata']['name'] = 'mydrydock-' + template['metadata']['name'] + '-' + str(i)
+    #         template['metadata']['excluded_jobs'] = excluded_init_jobs
+
+    #         yield serialize.dumps(template)
 
 
 CORE_SYNC_WAVES_ORDER: SYNC_WAVES_ORDER_ATTRS_TYPE = {
