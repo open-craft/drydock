@@ -14,6 +14,7 @@ from tutor import serialize, types
 from tutor import config as tutor_config
 from tutor.commands.k8s import k8s
 from tutor.commands.jobs import do_callback
+from tutor import fmt
 
 from .__about__ import __version__
 
@@ -23,9 +24,9 @@ def _is_init_job_excluded(excluded_init_jobs: set[str], job_template: dict[str, 
     """
     Check if the job is excluded from the init jobs.
     """
-    print(f"Checking if {job_template['metadata']['name']} is excluded from the init jobs...")
-    print(f"Excluded init jobs: {excluded_init_jobs}")
-    print(f"Job template: {job_template}")
+    fmt.echo_info(f"Checking if {job_template['metadata']['name']} is excluded from the init jobs...")
+    fmt.echo_info(f"Excluded init jobs: {excluded_init_jobs}")
+    fmt.echo_info(f"Job template: {job_template}")
     return job_template['metadata']['name'] in excluded_init_jobs
 
 
@@ -33,9 +34,9 @@ def _is_init_job_for_service(service_name: str, job_template: dict[str, t.Any]) 
     """
     Check if the job is for the given service.
     """
-    print(f"Checking if {job_template['metadata']['name']} is for the {service_name} service...")
-    print(f"Service name: {service_name}")
-    print(f"Job template: {job_template}")
+    fmt.echo_info(f"Checking if {job_template['metadata']['name']} is for the {service_name} service...")
+    fmt.echo_info(f"Service name: {service_name}")
+    fmt.echo_info(f"Job template: {job_template}")
     return job_template['metadata']['name'] == service_name + '-job'
 
 
@@ -45,9 +46,9 @@ def _is_valid_init_job(excluded_init_jobs: set[str], service_name: str, job_temp
     """
     is_excluded = _is_init_job_excluded(excluded_init_jobs, job_template)
     is_for_service = _is_init_job_for_service(service_name, job_template)
-    print(f"Is excluded: {is_excluded}")
-    print(f"Is for service: {is_for_service}")
-    print(f"Result: {not is_excluded and is_for_service}")
+    fmt.echo_info(f"Is excluded: {is_excluded}")
+    fmt.echo_info(f"Is for service: {is_for_service}")
+    fmt.echo_info(f"Result: {not is_excluded and is_for_service}")
     return not is_excluded and is_for_service
 
 
