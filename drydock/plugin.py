@@ -103,6 +103,7 @@ def get_init_tasks():
             template["spec"]["template"]["spec"]["containers"][0]["args"] = container_args
             template["spec"]["backoffLimit"] = 1
             template["spec"]["ttlSecondsAfterFinished"] = 3600
+            template['metadata']['excluded_jobs'] = excluded_init_jobs
 
             yield serialize.dumps(template)
 
