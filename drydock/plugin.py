@@ -77,32 +77,7 @@ def get_init_tasks():
         for template in filter(lambda x: _is_valid_init_job(excluded_init_jobs, service, x), init_jobs):
             render_command = tutor_env.render_str(tutor_conf, command)
 
-            template['metadata']['name'] = 'drydock-' + template['metadata']['name'] + '-' + str(i)
-            template['metadata']['labels'].update({
-                'app.kubernetes.io/component': 'drydock-job',
-                'drydock.io/target-service': template['metadata']['name'],
-                'drydock.io/runner-service': template['metadata']['name']
-            })
-            template['metadata']['annotations'] = {
-                'argocd.argoproj.io/sync-wave': INIT_JOBS_SYNC_WAVE + i * 2,
-                'argocd.argoproj.io/hook': 'Sync',
-                'argocd.argoproj.io/hook-delete-policy': 'HookSucceeded,BeforeHookCreation'
-            }
-
-            shell_command = ["sh", "-e", "-c"]
-            if template["spec"]["template"]["spec"]["containers"][0].get("command") == []:
-                # In some cases, we need to bypass the container entrypoint.
-                # Unfortunately, AFAIK, there is no way to do so in K8s manifests. So we mark
-                # some jobs with "command: []". For these jobs, the entrypoint becomes "sh -e -c".
-                # We do not do this for every job, because some (most) entrypoints are actually useful.
-                template["spec"]["template"]["spec"]["containers"][0]["command"] = shell_command
-                container_args = [render_command]
-            else:
-                container_args = shell_command + [render_command]
-
-            template["spec"]["template"]["spec"]["containers"][0]["args"] = container_args
-            template["spec"]["backoffLimit"] = 1
-            template["spec"]["ttlSecondsAfterFinished"] = 3600
+            template['metadata']['name'] = 'mydrydock-' + template['metadata']['name'] + '-' + str(i)
             template['metadata']['excluded_jobs'] = excluded_init_jobs
 
             yield serialize.dumps(template)
