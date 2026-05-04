@@ -89,7 +89,10 @@ def get_init_tasks():
 
             render_command = tutor_env.render_str(tutor_conf, command)
 
-            template["metadata"]["name"] = "drydock-" + template["metadata"]["name"] + "-" + str(i)
+            template["metadata"]["name"] = f"drydock-{template['metadata']['name']}-{i}"
+            if template["metadata"]["name"] in excluded_init_jobs:
+                continue
+
             template["metadata"]["labels"].update(
                 {
                     "app.kubernetes.io/component": "drydock-job",
